@@ -13,12 +13,13 @@ $exeDir = $projectRoot
 $text = @"
 #Requires AutoHotkey v2.0
 
+cascadeWindowSizeRatio := 0.66
 resizeDelta := 0.05
 moveStep := 50
 
 ^#!c::  ; Cascade windows
 {
-    Run("$exeDir\util.exe cascade", , "Hide")
+    Run("$exeDir\util.exe cascade " cascadeWindowSizeRatio "", , "Hide")
 }
 
 ^#!=::  ; Upsize active window

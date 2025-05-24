@@ -254,28 +254,30 @@ namespace Utils
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Usage: util.exe cascade | up [delta] | down [delta] | move [x] [y]");
+                Console.WriteLine("Usage: util.exe cascade [ratio] | up [delta] | down [delta] | move [x] [y]");
                 return;
             }
 
             string action = args[0].ToLowerInvariant();
-            float ratio = 0.80f;
-            float delta = 0.05f;
+            float cascadedRatio = 0.66f;
+            float resizeDelta = 0.05f;
 
             switch (action)
             {
                 case "cascade":
-                    WindowManager.CascadeWindows(ratio);
+                    if (args.Length > 1 && float.TryParse(args[1], out float ratio))
+                        cascadedRatio = ratio;
+                    WindowManager.CascadeWindows(cascadedRatio);
                     break;
                 case "up":
                     if (args.Length > 1 && float.TryParse(args[1], out float upDelta))
-                        delta = upDelta;
-                    WindowResizer.UpsizeActiveWindow(delta);
+                        resizeDelta = upDelta;
+                    WindowResizer.UpsizeActiveWindow(resizeDelta);
                     break;
                 case "down":
                     if (args.Length > 1 && float.TryParse(args[1], out float downDelta))
-                        delta = downDelta;
-                    WindowResizer.DownsizeActiveWindow(delta);
+                        resizeDelta = downDelta;
+                    WindowResizer.DownsizeActiveWindow(resizeDelta);
                     break;
                 case "move":
                     int x = 0, y = 0;
