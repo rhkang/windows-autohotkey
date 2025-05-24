@@ -6,4 +6,4 @@ $compilerPath = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild
 $srcDir = "${projectRoot}/src"
 
 # execute the compiler
-& $compilerPath /nologo /out:util.exe $srcDir/*cs
+& $compilerPath /nologo /out:util.exe $srcDir/*.cs
