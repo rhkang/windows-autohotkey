@@ -1,7 +1,7 @@
 # Windows 11 Utils
 
 ## Windows Managing
-You can modify move delta or resize ratio delta at `register.ps1`.
+You can modify windows size factor and move delta at `register.ps1`.
 
 ### Cascade
 Ctrl + Win + Alt + c
@@ -23,6 +23,7 @@ Ctrl + Win + Alt + Arrow
 > .\scripts\build.ps1   # this creates executables that autohoykey would launch
 > .\scripts\register.ps1    # create ahk file and add lnk to StartUp directory
 ```
+As source build uses c# compiler `csc.exe`, you may require to install Visual Studio or dotnet sdk. You can configure the compiler path at `build.ps1`. In default, it fetches Visual Studio's compiler.
 
 ## Uninstall
 ```pwsh
