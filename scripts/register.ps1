@@ -14,42 +14,63 @@ $text = @"
 #Requires AutoHotkey v2.0
 
 cascadeWindowSizeRatio := 0.66
-resizeDelta := 0.05
+resizeRatioDelta := 0.05
 moveStep := 50
+resizeAddDelta := 50
 
-^#!c::  ; Cascade windows
+^#c::  ; Cascade windows
 {
     Run("$exeDir\util.exe cascade " cascadeWindowSizeRatio "", , "Hide")
 }
 
-^#!=::  ; Upsize active window
+^#=::  ; Upsize active window
 {
-    Run("$exeDir\util.exe up " resizeDelta "", , "Hide")
+    Run("$exeDir\util.exe up " resizeRatioDelta "", , "Hide")
 }
 
-^#!-::  ; Downsize active window
+^#-::  ; Downsize active window
 {
-    Run("$exeDir\util.exe down " resizeDelta "", , "Hide")
+    Run("$exeDir\util.exe down " resizeRatioDelta "", , "Hide")
 }
 
-^#!Right::  ; move right
+^#Right::  ; move right
 {
     Run("$exeDir\util.exe move " moveStep " 0", , "Hide")
 }
 
-^#!Left::  ; move left
+^#Left::  ; move left
 {
     Run("$exeDir\util.exe move -" moveStep " 0", , "Hide")
 }
 
-^#!Up::  ; move up
+^#Up::  ; move up
 {
     Run("$exeDir\util.exe move 0 -" moveStep "", , "Hide")
 }
 
-^#!Down::  ; move down
+^#Down::  ; move down
 {
     Run("$exeDir\util.exe move 0 " moveStep "", , "Hide")
+}
+
+^#!Up::  ; height decrease
+{
+    Run("$exeDir\util.exe add 0 -" resizeAddDelta "", , "Hide")
+}
+
+^#!Down::  ; height increase
+{
+    Run("$exeDir\util.exe add 0 " resizeAddDelta "", , "Hide")
+}
+
+^#!Left::  ; width decrease
+{
+    Run("$exeDir\util.exe add -" resizeAddDelta " 0", , "Hide")
+}
+
+^#!Right::  ; width increase
+{
+    Run("$exeDir\util.exe add " resizeAddDelta " 0", , "Hide")
 }
 "@
 

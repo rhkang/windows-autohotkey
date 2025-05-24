@@ -192,6 +192,56 @@ namespace Utils
 
     public static class WindowResizer
     {
+        private const int MINLENGTH = 100;
+
+        public static void ResizeActiveWindowHeight(int deltaHeight)
+        {
+            IntPtr hWnd = GetForegroundWindow();
+            if (hWnd == IntPtr.Zero || hWnd == GetShellWindow())
+                return;
+
+            RECT rect;
+            if (!GetWindowRect(hWnd, out rect))
+                return;
+
+            int currentHeight = rect.Bottom - rect.Top;
+            int newHeight = currentHeight + deltaHeight;
+
+            if (newHeight < MINLENGTH)
+                newHeight = MINLENGTH;
+
+            int screenWidth = GetSystemMetrics(0);
+            int screenHeight = GetSystemMetrics(1);
+            int posX = rect.Left;
+            int posY = rect.Top;
+
+            MoveWindow(hWnd, posX, posY, rect.Right - rect.Left, newHeight, true);
+        }
+
+        public static void ResizeActiveWindowWidth(int deltaWidth)
+        {
+            IntPtr hWnd = GetForegroundWindow();
+            if (hWnd == IntPtr.Zero || hWnd == GetShellWindow())
+                return;
+
+            RECT rect;
+            if (!GetWindowRect(hWnd, out rect))
+                return;
+
+            int currentWidth = rect.Right - rect.Left;
+            int newWidth = currentWidth + deltaWidth;
+
+            if (newWidth < MINLENGTH)
+                newWidth = MINLENGTH;
+
+            int screenWidth = GetSystemMetrics(0);
+            int screenHeight = GetSystemMetrics(1);
+            int posX = rect.Left;
+            int posY = rect.Top;
+
+            MoveWindow(hWnd, posX, posY, newWidth, rect.Bottom - rect.Top, true);
+        }
+
         public static void UpsizeActiveWindow(float deltaRatio)
         {
             ResizeActiveWindowByDelta(deltaRatio);
@@ -254,13 +304,13 @@ namespace Utils
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Usage: util.exe cascade [ratio] | up [delta] | down [delta] | move [x] [y]");
+                Console.WriteLine("Usage: util.exe cascade [ratio] | up [delta] | down [delta] | move [x] [y] | add [x] [y]");
                 return;
             }
 
             string action = args[0].ToLowerInvariant();
             float cascadedRatio = 0.66f;
-            float resizeDelta = 0.05f;
+            float resizeRatioDelta = 0.05f;
 
             switch (action)
             {
@@ -271,13 +321,13 @@ namespace Utils
                     break;
                 case "up":
                     if (args.Length > 1 && float.TryParse(args[1], out float upDelta))
-                        resizeDelta = upDelta;
-                    WindowResizer.UpsizeActiveWindow(resizeDelta);
+                        resizeRatioDelta = upDelta;
+                    WindowResizer.UpsizeActiveWindow(resizeRatioDelta);
                     break;
                 case "down":
                     if (args.Length > 1 && float.TryParse(args[1], out float downDelta))
-                        resizeDelta = downDelta;
-                    WindowResizer.DownsizeActiveWindow(resizeDelta);
+                        resizeRatioDelta = downDelta;
+                    WindowResizer.DownsizeActiveWindow(resizeRatioDelta);
                     break;
                 case "move":
                     int x = 0, y = 0;
@@ -292,6 +342,21 @@ namespace Utils
                         y = x;
                     }
                     WindowManager.MoveForegroundWindowByOffset(x, y);
+                    break;
+                case "add":
+                    int deltaX = 0, deltaY = 0;
+                    if (args.Length > 2)
+                    {
+                        int.TryParse(args[1], out deltaX);
+                        int.TryParse(args[2], out deltaY);
+                    }
+                    else if (args.Length > 1)
+                    {
+                        int.TryParse(args[1], out deltaX);
+                        deltaY = deltaX;
+                    }
+                    WindowResizer.ResizeActiveWindowWidth(deltaX);
+                    WindowResizer.ResizeActiveWindowHeight(deltaY);
                     break;
                 default:
                     Console.WriteLine("Unknown action: " + action);

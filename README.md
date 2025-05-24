@@ -5,14 +5,19 @@
 You can modify windows size factor and move delta at `register.ps1`.
 
 ### Cascade
-Ctrl + Win + Alt + c
+Ctrl + Win + c
 
 ### Resize
-- Ctrl + Win + Alt + '+' : Upsize
-- Ctrl + Win + Alt + '-' : Downsize
+
+#### Preserve Windows Ratio
+- Ctrl + Win + '+' : Upsize
+- Ctrl + Win + '-' : Downsize
+
+#### Add Width or Height
+- Ctrl + Win + Alt + Arrow
 
 ### Move
-Ctrl + Win + Alt + Arrow
+Ctrl + Win + Arrow
 
 ## Install
 1. Install [AutoHotKey](https://www.autohotkey.com/)
