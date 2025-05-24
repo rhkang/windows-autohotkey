@@ -4,9 +4,6 @@ $compilerPath = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild
 . ${PSScriptRoot}/params.ps1
 
 $srcDir = "${projectRoot}/src"
-$sourceFiles = @(
-    "${srcDir}/util.cs"
-)
 
 # execute the compiler
-& $compilerPath /nologo /out:util.exe $sourceFiles
+& $compilerPath /nologo /out:util.exe $srcDir/*cs
