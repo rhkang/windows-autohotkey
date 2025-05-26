@@ -44,12 +44,20 @@ namespace Utils
         [DllImport("user32.dll")]
         private static extern bool IsIconic(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
         private const int GWL_STYLE = -16;
         private const int WS_VISIBLE = 0x10000000;
         private const int WS_BORDER = 0x00800000;
         private const int WS_CAPTION = 0x00C00000;
         private const int WS_MAXIMIZE = 0x01000000;
         private const int SW_RESTORE = 9;
+        private const uint MONITOR_DEFAULTTONEAREST = 2;
+
 
         [StructLayout(LayoutKind.Sequential)]
         private struct RECT
@@ -58,6 +66,15 @@ namespace Utils
             public int Top;
             public int Right;
             public int Bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
         }
 
         public static void MoveForegroundWindowByOffset(int xOffset, int yOffset)
@@ -97,8 +114,18 @@ namespace Utils
         public static void CascadeWindows(float ratio)
         {
             IntPtr shellWindow = GetShellWindow();
-            int screenWidth = GetSystemMetrics(0);
-            int screenHeight = GetSystemMetrics(1);
+            IntPtr foregroundWindow = GetForegroundWindow();
+            IntPtr monitor = MonitorFromWindow(foregroundWindow, MONITOR_DEFAULTTONEAREST);
+
+            MONITORINFO monitorInfo = new MONITORINFO();
+            monitorInfo.cbSize = Marshal.SizeOf(typeof(MONITORINFO));
+            if (!GetMonitorInfo(monitor, ref monitorInfo))
+                return;
+
+            int screenLeft = monitorInfo.rcWork.Left;
+            int screenTop = monitorInfo.rcWork.Top;
+            int screenWidth = monitorInfo.rcWork.Right - monitorInfo.rcWork.Left;
+            int screenHeight = monitorInfo.rcWork.Bottom - monitorInfo.rcWork.Top;
             int newWidth = (int)(screenWidth * ratio);
             int newHeight = (int)(screenHeight * ratio);
             int offsetX = 50;
@@ -106,7 +133,7 @@ namespace Utils
 
             EnumWindows((hWnd, lParam) =>
                 {
-                    if (ShouldIncludeWindow(hWnd, shellWindow))
+                    if (ShouldIncludeWindow(hWnd, shellWindow) && IsWindowOnMonitor(hWnd, monitor))
                     {
                         int style = GetWindowLong(hWnd, GWL_STYLE);
                         if ((style & WS_MAXIMIZE) != 0 || IsIconic(hWnd))
@@ -120,13 +147,13 @@ namespace Utils
             int windowCount = 0;
             EnumWindows((hWnd, lParam) =>
                 {
-                    if (ShouldIncludeWindow(hWnd, shellWindow))
+                    if (ShouldIncludeWindow(hWnd, shellWindow) && IsWindowOnMonitor(hWnd, monitor))
                         windowCount++;
                     return true;
                 }, IntPtr.Zero);
 
-            int screenCenterX = screenWidth / 2;
-            int screenCenterY = screenHeight / 2;
+            int screenCenterX = screenLeft + screenWidth / 2;
+            int screenCenterY = screenTop + screenHeight / 2;
             int startX = screenCenterX + (windowCount - 1) * offsetX / 2;
             int startY = screenCenterY + (windowCount - 1) * offsetY / 2;
             startX -= newWidth / 2;
@@ -136,7 +163,7 @@ namespace Utils
             int index = 0;
             EnumWindows((hWnd, lParam) =>
                 {
-                    if (ShouldIncludeWindow(hWnd, shellWindow) && index < windowCount)
+                    if (ShouldIncludeWindow(hWnd, shellWindow) && IsWindowOnMonitor(hWnd, monitor) && index < windowCount)
                     {
                         windows[index++] = hWnd;
                     }
@@ -155,6 +182,13 @@ namespace Utils
                 }
                 catch { }
             }
+        }
+
+        // Helper to check if a window is on the given monitor
+        private static bool IsWindowOnMonitor(IntPtr hWnd, IntPtr monitor)
+        {
+            IntPtr windowMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+            return windowMonitor == monitor;
         }
 
         private static bool ShouldIncludeWindow(IntPtr hWnd, IntPtr shellWindow)
